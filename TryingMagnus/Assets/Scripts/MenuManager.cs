@@ -10,6 +10,10 @@ public class MenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("FreeKickScene");
     }
+    public void LoadPenaltyScene()
+    {
+        SceneManager.LoadScene("PenaltyScene");
+    }
     // Start is called before the first frame update
     void Start()
     {
