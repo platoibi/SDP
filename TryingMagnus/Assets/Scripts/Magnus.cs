@@ -16,6 +16,7 @@ public class Magnus : MonoBehaviour
     Vector3 initVel;
     Vector3 initAngVel;
     Quaternion initRot;
+    TrailRenderer trail;
     int power;
     public void Shoot()
     {
@@ -23,10 +24,19 @@ public class Magnus : MonoBehaviour
         rb.AddForceAtPosition(shotDirection * shotPower, impactPosition.position);
         Invoke("StopForce", 0.5f);
     }
-
+    void ResetTrail()
+    {
+        trail.emitting = true;
+    }
     private void StopForce()
     {
         power = 0;
+    }
+
+    private int CalculateScore(Transform entryPos, Transform center)
+    {
+        float score = Mathf.Abs(entryPos.position.z - center.position.z)*15 + Mathf.Abs(entryPos.position.y-center.position.y)*30 + entryPos.position.y*10 + 10;
+        return (int)score;
     }
 
     private void ResetBall()
@@ -36,7 +46,10 @@ public class Magnus : MonoBehaviour
         transform.position = new Vector3(Random.Range(30, 35f), initPos.y, Random.Range(-6.0f, 6.0f));
         transform.rotation = initRot;
         followBall.UpdatePosition(transform.position);
+        trail.emitting = false;
+        trail.Clear();
         power = 1;
+        Invoke("ResetTrail", 0.2f);
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -48,6 +61,8 @@ public class Magnus : MonoBehaviour
         else if( other.name == "GoalEntryTrigger" )
         {
             power = -1;
+            int score = CalculateScore(transform, other.transform);
+            SucessTextManager.sucessTextManager.DisplayPoints(transform, score);
         }
         else
         {
@@ -61,6 +76,7 @@ public class Magnus : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        trail = GetComponent<TrailRenderer>();
     }
     void Start() {
         initVel = rb.velocity;
@@ -74,7 +90,7 @@ public class Magnus : MonoBehaviour
     void FixedUpdate()
     {
         var direction = Vector3.Cross(rb.angularVelocity, rb.velocity);
-        var magnitude = 4 / 3f * Mathf.PI * airDensity * Mathf.Pow(radius, 3)*power;
+        var magnitude = 4 / 3f * Mathf.PI * airDensity * Mathf.Pow(radius, 3) * power;
         rb.AddForce(magnitude * direction);
     }
 }
