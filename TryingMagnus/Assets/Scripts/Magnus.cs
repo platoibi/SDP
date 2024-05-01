@@ -18,11 +18,20 @@ public class Magnus : MonoBehaviour
     Quaternion initRot;
     TrailRenderer trail;
     int power;
+    public static Magnus magnus;
     public void Shoot()
     {
         rb.constraints = RigidbodyConstraints.None;
         rb.AddForceAtPosition(shotDirection * shotPower, impactPosition.position);
         Invoke("StopForce", 0.5f);
+    }
+    public void Shoot(float straight, float up, float left, float right, float acc)
+    {
+        print("left: " + left.ToString());
+        print("up: " + up.ToString());
+        print("straight: " + straight.ToString());
+        shotDirection = new Vector3(100, (acc-2)*3, 70 * left - 70 * right);
+        Shoot();
     }
     void ResetTrail()
     {
@@ -43,7 +52,7 @@ public class Magnus : MonoBehaviour
     {
         rb.constraints = RigidbodyConstraints.FreezeAll;
         transform.position = initPos;
-        transform.position = new Vector3(Random.Range(30, 35f), initPos.y, Random.Range(-6.0f, 6.0f));
+        transform.position = new Vector3(Random.Range(25, 35f), initPos.y, Random.Range(-7.0f, 7.0f));
         transform.rotation = initRot;
         followBall.UpdatePosition(transform.position);
         trail.emitting = false;
@@ -60,7 +69,7 @@ public class Magnus : MonoBehaviour
         }
         else if( other.name == "GoalEntryTrigger" )
         {
-            power = -1;
+            //power = -1;
             int score = CalculateScore(transform, other.transform);
             SucessTextManager.sucessTextManager.DisplayPoints(transform, score);
         }
@@ -75,10 +84,12 @@ public class Magnus : MonoBehaviour
 
     void Awake()
     {
+        magnus = this;
         rb = GetComponent<Rigidbody>();
         trail = GetComponent<TrailRenderer>();
     }
     void Start() {
+        Random.InitState(System.DateTime.Now.Millisecond);
         initVel = rb.velocity;
         initAngVel = rb.angularVelocity;
         initPos = transform.position;
